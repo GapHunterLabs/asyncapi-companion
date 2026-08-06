@@ -75,6 +75,35 @@ class YamlAsyncApiRefReferenceTest : BasePlatformTestCase() {
         assertEquals("user-signed-up.yaml", keyValue.containingFile.name)
     }
 
+    fun testDoesNotResolveWhenTargetIsMissingInAMultiKeyCrossFileTarget() {
+        // Reproduces a real demo-data bug: the target file has TWO
+        // top-level keys (not just one, like testResolvesRefAcrossTwoFiles
+        // above), and the $ref points at a THIRD key that doesn't exist.
+        myFixture.addFileToProject(
+            "components.yaml",
+            """
+            OrderPlaced:
+              type: object
+            ShipmentDispatched:
+              type: object
+            """.trimIndent(),
+        )
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            channels:
+              order/refunded:
+                subscribe:
+                  message:
+                    ${'$'}ref: 'components.yaml#/RefundIssued'
+            """.trimIndent(),
+        )
+        val refScalar = findRefScalar(myFixture.file)
+        val resolved = YamlAsyncApiRefReference(refScalar).resolve()
+        assertNull("expected RefundIssued to NOT resolve -- it's not a key in components.yaml", resolved)
+    }
+
     fun testDoesNotResolveWhenTargetIsMissing() {
         myFixture.configureByText(
             "asyncapi.yaml",

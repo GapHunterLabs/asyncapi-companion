@@ -1,0 +1,32 @@
+OrderPlaced:
+  type: object
+  properties:
+    orderId:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+    totalCents:
+      type: integer
+    currency:
+      type: string
+      enum: [USD, EUR, GBP]
+    placedAt:
+      type: string
+      format: date-time
+  required: [orderId, customerId, totalCents, currency, placedAt]
+
+ShipmentDispatched:
+  type: object
+  properties:
+    orderId:
+      type: string
+      format: uuid
+    carrier:
+      type: string
+    trackingNumber:
+      type: string
+    dispatchedAt:
+      type: string
+      format: date-time
+  required: [orderId, carrier, trackingNumber, dispatchedAt]

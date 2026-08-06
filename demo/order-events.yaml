@@ -1,0 +1,29 @@
+asyncapi: "2.6.0"
+info:
+  title: Acme Order Events API
+  version: 1.4.0
+  description: Events published when an order moves through fulfillment.
+
+servers:
+  production:
+    url: events.acme-corp.com:9092
+    protocol: kafka
+
+channels:
+  order.placed:
+    subscribe:
+      summary: A customer completed checkout.
+      message:
+        $ref: 'components.yaml#/OrderPlaced'
+
+  order.shipment.dispatched:
+    subscribe:
+      summary: A carrier picked up the shipment.
+      message:
+        $ref: 'components.yaml#/ShipmentDispatched'
+
+  order.refunded:
+    subscribe:
+      summary: A refund was issued for an order.
+      message:
+        $ref: 'components.yaml#/RefundIssued'
