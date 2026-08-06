@@ -1,0 +1,35 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.gaphunter.asyncapicompanion</id>
+    <name>AsyncAPI Companion</name>
+    <vendor>Gap Hunter Labs</vendor>
+    <description><![CDATA[
+        <p>Reliable go-to-definition for $ref in AsyncAPI documents
+        (JSON and YAML, same-file and external-file) that never breaks
+        across a JetBrains IDE version bump.</p>
+        <p>Built from real, current evidence: the leading FREEMIUM
+        AsyncAPI plugin has 55% of its recent reviews at 3 stars or
+        fewer despite being actively developed -- "suddenly no longer
+        works... says the java plugin is required", "does not work with
+        IntelliJ 2024.2.4", and a real preview bug ("Error: the
+        asyncapi field is missing" on a file that validates fine
+        elsewhere). This plugin does one thing -- resolve $ref reliably,
+        locally, with no network calls -- and keeps doing it release
+        after release.</p>
+        <p>Free. No license nags, no telemetry, no popups.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.json</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <psi.referenceContributor language="JSON"
+                                   implementation="dev.gaphunter.asyncapicompanion.reference.JsonAsyncApiRefReferenceContributor"/>
+        <psi.referenceContributor language="yaml"
+                                   implementation="dev.gaphunter.asyncapicompanion.reference.YamlAsyncApiRefReferenceContributor"/>
+        <annotator language="JSON" implementationClass="dev.gaphunter.asyncapicompanion.highlighting.AsyncApiRefAnnotator"/>
+        <annotator language="yaml" implementationClass="dev.gaphunter.asyncapicompanion.highlighting.AsyncApiRefAnnotator"/>
+        <json.jsonSchemaGotoDeclarationSuppressor implementation="dev.gaphunter.asyncapicompanion.reference.AsyncApiJsonSchemaGtdSuppressor"/>
+    </extensions>
+</idea-plugin>
