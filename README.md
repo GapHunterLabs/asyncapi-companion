@@ -64,7 +64,7 @@ warning instead of failing silently.
 ## Enterprise / Team Licensing
 
 Need enterprise features, custom validation rules, or team licensing?
-Contact us at **kennyj.diazm@gmail.com**.
+Contact us at **gaphunterlabs@gmail.com**.
 
 ## Development
 
