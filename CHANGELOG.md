@@ -4,6 +4,22 @@
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Fixed
+
+- Ctrl+Click/Ctrl+B on a `$ref` value showed "No usages found" instead
+  of navigating, in every real IDE session -- confirmed via live
+  logging that the bundled-handler suppressor and this plugin's own
+  reference resolution both worked correctly in isolation, but the
+  platform never fell back to the generic reference after suppressing
+  the bundled handler. Fixed by registering a real
+  `GotoDeclarationHandler` (the same extension point the bundled
+  handler itself uses), sidestepping that broken hand-off entirely.
+  Also fixes a caret-on-the-key-token case (clicking the literal
+  `$ref` text, not the value after it) that a naive first version of
+  the handler still missed.
+
 ## [0.1.0]
 
 ### Added
@@ -16,5 +32,6 @@
 - Suppresses the bundled JSON Schema go-to-declaration handler on
   recognized AsyncAPI files so this plugin's own resolution wins.
 
-[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.1...HEAD
+[0.1.1]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/asyncapi-companion/commits/0.1.0
