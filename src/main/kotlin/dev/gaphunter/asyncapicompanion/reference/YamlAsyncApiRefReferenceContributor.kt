@@ -12,7 +12,11 @@ import org.jetbrains.yaml.psi.YAMLScalar
 /**
  * YAML counterpart of [JsonAsyncApiRefReferenceContributor] -- wires
  * [YamlAsyncApiRefReference] up as go-to-definition on `$ref` scalar
- * values inside YAML-formatted AsyncAPI documents.
+ * values inside YAML-formatted AsyncAPI documents. Still registered
+ * even though [AsyncApiGotoDeclarationHandler] is now the real Ctrl+B
+ * path (see that class's doc) -- this contributed reference is what
+ * powers "unresolved reference" highlighting/annotations and Find
+ * Usages, both real uses independent of go-to-declaration.
  */
 class YamlAsyncApiRefReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {

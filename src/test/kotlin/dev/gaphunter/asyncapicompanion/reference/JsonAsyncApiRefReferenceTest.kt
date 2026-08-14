@@ -1,5 +1,6 @@
 package dev.gaphunter.asyncapicompanion.reference
 
+import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction
 import com.intellij.json.psi.JsonFile
 import com.intellij.json.psi.JsonProperty
 import com.intellij.json.psi.JsonStringLiteral
@@ -130,5 +131,47 @@ class JsonAsyncApiRefReferenceTest : BasePlatformTestCase() {
         )
         val refLiteral = findRefStringLiteral(myFixture.file)
         assertNull(JsonAsyncApiRefUtil.asRefProperty(refLiteral))
+    }
+
+    /**
+     * Real end-to-end Ctrl+B/Ctrl+Click simulation -- [myFixture.gotoDeclaration]
+     * runs the platform's actual `GotoDeclarationAction` pipeline (every
+     * registered `GotoDeclarationHandler`, THEN generic `PsiReference`
+     * resolution, with [AsyncApiJsonSchemaGtdSuppressor] consulted in
+     * between), unlike every other test in this file/class which calls
+     * `resolve()` on our own reference class directly and so can never
+     * catch a suppressor/registration problem. Added 2026-08-12 after a
+     * real runIde sandbox showed "No usages found" on this exact caret
+     * position -- see [[openapi_companion_ctrlclick_broken_with_trial]]
+     * memory entry for the full investigation.
+     */
+    fun testGotoDeclarationNavigatesThroughTheRealPlatformPipeline() {
+        myFixture.configureByText(
+            "asyncapi.json",
+            """
+            {
+              "asyncapi": "2.6.0",
+              "channels": {
+                "user/signedup": { "subscribe": { "message": {
+                  "${'$'}ref": "#/components/messages/UserSignedUp<caret>"
+                } } }
+              },
+              "components": {
+                "messages": {
+                  "UserSignedUp": { "payload": { "type": "object" } }
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        val editor = myFixture.editor
+        val offset = editor.caretModel.offset
+        val targets = GotoDeclarationAction.findAllTargetElements(myFixture.project, editor, offset)
+        assertTrue(
+            "expected Ctrl+B at the \$ref caret to navigate to the UserSignedUp " +
+                "definition via the real platform pipeline, but got no targets " +
+                "(this is the exact 'No usages found' symptom seen live)",
+            targets.isNotEmpty(),
+        )
     }
 }

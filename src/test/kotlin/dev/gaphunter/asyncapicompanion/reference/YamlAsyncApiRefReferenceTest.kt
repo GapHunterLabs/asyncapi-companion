@@ -1,5 +1,6 @@
 package dev.gaphunter.asyncapicompanion.reference
 
+import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction
 import com.intellij.psi.PsiFile
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
@@ -183,5 +184,178 @@ class YamlAsyncApiRefReferenceTest : BasePlatformTestCase() {
         )
         val refScalar = findRefScalar(myFixture.file)
         assertNull(YamlAsyncApiRefUtil.asRefKeyValue(refScalar))
+    }
+
+    /**
+     * Real end-to-end Ctrl+B/Ctrl+Click simulation on a YAML AsyncAPI
+     * file -- same real-pipeline check as
+     * [JsonAsyncApiRefReferenceTest.testGotoDeclarationNavigatesThroughTheRealPlatformPipeline],
+     * but reproducing the exact format (YAML, not JSON) used in the
+     * live `runIde` sandbox session where Ctrl+Click showed "No usages
+     * found" -- see [[openapi_companion_ctrlclick_broken_with_trial]]
+     * memory entry. [testContributedReferenceIsAttachedThroughTheRealExtensionPipeline]
+     * above only proves the generic PsiReference is attached; it does
+     * NOT prove GotoDeclarationAction picks it, because
+     * GotoDeclarationHandlers (the suppressor's territory) are
+     * consulted first and could still win even with a valid reference
+     * sitting right there.
+     */
+    fun testGotoDeclarationNavigatesThroughTheRealPlatformPipeline() {
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            channels:
+              user/signedup:
+                subscribe:
+                  message:
+                    ${'$'}ref: '#/components/messages/UserSignedUp<caret>'
+            components:
+              messages:
+                UserSignedUp:
+                  payload:
+                    type: object
+            """.trimIndent(),
+        )
+        val editor = myFixture.editor
+        val offset = editor.caretModel.offset
+        val targets = GotoDeclarationAction.findAllTargetElements(myFixture.project, editor, offset)
+        assertTrue(
+            "expected Ctrl+B at the \$ref caret to navigate to the UserSignedUp " +
+                "definition via the real platform pipeline, but got no targets " +
+                "(this is the exact 'No usages found' symptom seen live)",
+            targets.isNotEmpty(),
+        )
+    }
+
+    /**
+     * Direct unit test of [AsyncApiGotoDeclarationHandler] -- added
+     * 2026-08-13 as the actual fix for the confirmed platform bug (see
+     * `openapi_companion_ctrlclick_broken_with_trial` memory entry):
+     * logging in a real `runIde` sandbox proved the suppressor +
+     * generic-PsiReference-fallback hand-off silently breaks after
+     * Ctrl+B, even though both halves work correctly in isolation. A
+     * real `GotoDeclarationHandler` sidesteps that hand-off -- the
+     * platform calls it directly, same extension point the bundled
+     * handler itself uses.
+     */
+    fun testGotoDeclarationHandlerResolvesTheSameRefDirectly() {
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            channels:
+              user/signedup:
+                subscribe:
+                  message:
+                    ${'$'}ref: '#/components/messages/UserSignedUp<caret>'
+            components:
+              messages:
+                UserSignedUp:
+                  payload:
+                    type: object
+            """.trimIndent(),
+        )
+        val sourceElement = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = AsyncApiGotoDeclarationHandler()
+            .getGotoDeclarationTargets(sourceElement, myFixture.caretOffset, myFixture.editor)
+        assertNotNull("expected the handler to return a non-null target array", targets)
+        assertTrue("expected at least one target", targets!!.isNotEmpty())
+        val keyValue = targets[0].parent as YAMLKeyValue
+        assertEquals("UserSignedUp", keyValue.keyText)
+    }
+
+    /**
+     * Same as [testGotoDeclarationHandlerResolvesTheSameRefDirectly] but
+     * with the caret at the very START of the `$ref` value (right after
+     * the opening quote), not mid-text -- this is the exact caret
+     * position from the live sandbox reproduction where Ctrl+Click still
+     * failed even after the handler was first added, catching a real
+     * PSI-depth bug (`sourceElement.parent as? YAMLScalar` assumed a
+     * fixed single-parent hop that only held for a caret placed inside
+     * the value's own leaf token, not at the scalar's own boundary).
+     */
+    fun testGotoDeclarationHandlerResolvesWithCaretAtStartOfRefValue() {
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            channels:
+              user/signedup:
+                subscribe:
+                  message:
+                    ${'$'}ref: '<caret>#/components/messages/UserSignedUp'
+            components:
+              messages:
+                UserSignedUp:
+                  payload:
+                    type: object
+            """.trimIndent(),
+        )
+        val sourceElement = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = AsyncApiGotoDeclarationHandler()
+            .getGotoDeclarationTargets(sourceElement, myFixture.caretOffset, myFixture.editor)
+        assertNotNull("expected the handler to return a non-null target array", targets)
+        assertTrue("expected at least one target", targets!!.isNotEmpty())
+        val keyValue = targets[0].parent as YAMLKeyValue
+        assertEquals("UserSignedUp", keyValue.keyText)
+    }
+
+    /**
+     * Reproduces the ACTUAL live failure, root-caused 2026-08-13 via
+     * `runIde` logging: the user clicked on the literal `$ref` KEY text
+     * (not the value after it), and `getGotoDeclarationTargets` received
+     * a `sourceElement` whose PSI ancestors never include the value
+     * `YAMLScalar` at all -- `PsiTreeUtil.getParentOfType(sourceElement,
+     * YAMLScalar::class.java, false)` (the first fix attempt) still
+     * returned null for this exact case, because walking up from the KEY
+     * token never reaches the VALUE scalar; they're siblings under the
+     * same `YAMLKeyValue`, not ancestor/descendant. The real fix walks up
+     * to the enclosing `YAMLKeyValue` first, then reads `.value`
+     * explicitly, so it doesn't matter which side of the `:` the caret
+     * lands on.
+     */
+    fun testGotoDeclarationHandlerResolvesWithCaretOnTheDollarRefKeyItself() {
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            channels:
+              user/signedup:
+                subscribe:
+                  message:
+                    ${'$'}re<caret>f: '#/components/messages/UserSignedUp'
+            components:
+              messages:
+                UserSignedUp:
+                  payload:
+                    type: object
+            """.trimIndent(),
+        )
+        val sourceElement = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = AsyncApiGotoDeclarationHandler()
+            .getGotoDeclarationTargets(sourceElement, myFixture.caretOffset, myFixture.editor)
+        assertNotNull("expected the handler to return a non-null target array", targets)
+        assertTrue("expected at least one target", targets!!.isNotEmpty())
+        val keyValue = targets[0].parent as YAMLKeyValue
+        assertEquals("UserSignedUp", keyValue.keyText)
+    }
+
+    fun testGotoDeclarationHandlerReturnsNullOutsideARecognizedAsyncApiFile() {
+        myFixture.configureByText(
+            "plain.yaml",
+            """
+            ${'$'}ref: '#/definitions/User<caret>'
+            definitions:
+              User: {}
+            """.trimIndent(),
+        )
+        val sourceElement = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = AsyncApiGotoDeclarationHandler()
+            .getGotoDeclarationTargets(sourceElement, myFixture.caretOffset, myFixture.editor)
+        assertTrue(
+            "expected no targets outside a recognized AsyncAPI file",
+            targets == null || targets.isEmpty(),
+        )
     }
 }

@@ -31,5 +31,6 @@
         <annotator language="JSON" implementationClass="dev.gaphunter.asyncapicompanion.highlighting.AsyncApiRefAnnotator"/>
         <annotator language="yaml" implementationClass="dev.gaphunter.asyncapicompanion.highlighting.AsyncApiRefAnnotator"/>
         <json.jsonSchemaGotoDeclarationSuppressor implementation="dev.gaphunter.asyncapicompanion.reference.AsyncApiJsonSchemaGtdSuppressor"/>
+        <gotoDeclarationHandler implementation="dev.gaphunter.asyncapicompanion.reference.AsyncApiGotoDeclarationHandler"/>
     </extensions>
 </idea-plugin>
