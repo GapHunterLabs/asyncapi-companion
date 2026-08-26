@@ -9,6 +9,7 @@ import dev.gaphunter.asyncapicompanion.reference.JsonAsyncApiRefReference
 import dev.gaphunter.asyncapicompanion.reference.JsonAsyncApiRefUtil
 import dev.gaphunter.asyncapicompanion.reference.YamlAsyncApiRefReference
 import dev.gaphunter.asyncapicompanion.reference.YamlAsyncApiRefUtil
+import dev.gaphunter.asyncapicompanion.review.ReviewPrompt
 import org.jetbrains.yaml.psi.YAMLScalar
 
 /**
@@ -41,6 +42,9 @@ class AsyncApiRefAnnotator : Annotator {
             holder.newAnnotation(HighlightSeverity.WARNING, "Cannot resolve reference '$refText'")
                 .range(element.textRange)
                 .create()
+            val file = element.containingFile
+            val lineNumber = file.viewProvider.document?.getLineNumber(element.textRange.startOffset)?.plus(1) ?: 0
+            ReviewPrompt.recordHit(file.project, "${file.virtualFile?.path}:$lineNumber:$refText")
         }
     }
 }

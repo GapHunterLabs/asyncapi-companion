@@ -24,6 +24,7 @@
     <depends>org.jetbrains.plugins.yaml</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="AsyncAPI Companion" displayType="BALLOON"/>
         <psi.referenceContributor language="JSON"
                                    implementation="dev.gaphunter.asyncapicompanion.reference.JsonAsyncApiRefReferenceContributor"/>
         <psi.referenceContributor language="yaml"
