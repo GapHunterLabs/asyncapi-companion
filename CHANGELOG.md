@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.2.0]
+
+### Added
+
+- An unresolved `$ref` into `#/channels/...` now explains the specific,
+  common gotcha when it applies: a channel name that's itself a
+  topic-like path (`user/signedup`) needs its `/` escaped as `~1` per
+  RFC 6901 -- when the unescaped literal genuinely matches a real
+  declared channel name, the warning names the exact fix.
+
 ## [0.1.2]
 
 ### Added
@@ -42,7 +52,8 @@
 - Suppresses the bundled JSON Schema go-to-declaration handler on
   recognized AsyncAPI files so this plugin's own resolution wins.
 
-[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.2...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.2.0...HEAD
+[0.2.0]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.2...0.2.0
 [0.1.2]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/GapHunterLabs/asyncapi-companion/commits/0.1.0
