@@ -52,6 +52,14 @@ plugins in this catalog. Paying and free users alike report:
   AsyncAPI-version-aware validation of the document itself beyond
   detecting it. Pure reference resolution, done reliably, is the whole
   product.
+- **One specific, real gotcha explained, not just flagged as broken:**
+  AsyncAPI channel names are commonly topic-like paths
+  (`user/signedup`, idiomatic for MQTT/Kafka-style channels). A `$ref`
+  into one written as `#/channels/user/signedup` instead of the
+  RFC-6901-escaped `#/channels/user~1signedup` silently fails to
+  resolve — when the unescaped literal genuinely matches a real
+  declared channel name, the warning names the fix directly instead of
+  a generic "cannot resolve".
 
 ## Usage
 
