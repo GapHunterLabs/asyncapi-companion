@@ -8,14 +8,15 @@
         (JSON and YAML, same-file and external-file) that never breaks
         across a JetBrains IDE version bump.</p>
         <p>Built from real, current evidence: the leading FREEMIUM
-        AsyncAPI plugin has 55% of its recent reviews at 3 stars or
-        fewer despite being actively developed -- "suddenly no longer
-        works... says the java plugin is required", "does not work with
-        IntelliJ 2024.2.4", and a real preview bug ("Error: the
-        asyncapi field is missing" on a file that validates fine
-        elsewhere). This plugin does one thing -- resolve $ref reliably,
-        locally, with no network calls -- and keeps doing it release
-        after release.</p>
+        AsyncAPI plugin has 55% of its reviews at 3 stars or fewer
+        (re-verified 2026-09) -- "suddenly no longer works... says the
+        java plugin is required" (2026-02), "does not work with
+        IntelliJ 2024.2.4" (2024-12), and a real preview bug ("Error:
+        the asyncapi field is missing" on a file that validates fine
+        elsewhere). This plugin does one thing -- resolve $ref
+        reliably, locally, with no network calls, including across
+        JSON and YAML files -- and keeps doing it release after
+        release.</p>
         <p>Free. No license nags, no telemetry, no popups.</p>
     ]]></description>
 
