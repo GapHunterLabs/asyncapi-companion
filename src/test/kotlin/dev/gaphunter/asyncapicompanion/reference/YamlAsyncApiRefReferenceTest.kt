@@ -76,6 +76,36 @@ class YamlAsyncApiRefReferenceTest : BasePlatformTestCase() {
         assertEquals("user-signed-up.yaml", keyValue.containingFile.name)
     }
 
+    /**
+     * YAML counterpart of
+     * [JsonAsyncApiRefReferenceTest.testResolvesRefIntoACrossFormatYamlFile]
+     * -- a YAML-formatted AsyncAPI document referencing a JSON-formatted
+     * shared component file, the other direction of the same previously
+     * unsupported cross-format case.
+     */
+    fun testResolvesRefIntoACrossFormatJsonFile() {
+        myFixture.addFileToProject(
+            "messages/user-signed-up.json",
+            """
+            { "UserSignedUp": { "payload": { "type": "object" } } }
+            """.trimIndent(),
+        )
+        myFixture.configureByText(
+            "asyncapi.yaml",
+            """
+            asyncapi: 2.6.0
+            components:
+              messages:
+                SignupRef:
+                  ${'$'}ref: 'messages/user-signed-up.json#/UserSignedUp'
+            """.trimIndent(),
+        )
+        val refScalar = findRefScalar(myFixture.file)
+        val resolved = YamlAsyncApiRefReference(refScalar).resolve()
+        assertNotNull("expected the YAML->JSON cross-format \$ref to resolve", resolved)
+        assertEquals("user-signed-up.json", resolved!!.containingFile.name)
+    }
+
     fun testDoesNotResolveWhenTargetIsMissingInAMultiKeyCrossFileTarget() {
         // Reproduces a real demo-data bug: the target file has TWO
         // top-level keys (not just one, like testResolvesRefAcrossTwoFiles

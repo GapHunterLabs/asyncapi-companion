@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+## [0.3.0]
+
+### Added
+
+- Cross-format `$ref` resolution: a JSON-formatted AsyncAPI document
+  can now reference a YAML-formatted shared component file, and vice
+  versa -- previously a deliberate v1 scope cut. The target file's
+  own real format decides which resolver applies, not the format of
+  the file containing the `$ref`.
+
 ## [0.2.0]
 
 ### Added
@@ -52,7 +62,8 @@
 - Suppresses the bundled JSON Schema go-to-declaration handler on
   recognized AsyncAPI files so this plugin's own resolution wins.
 
-[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.2...0.2.0
 [0.1.2]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.1...0.1.2
 [0.1.1]: https://github.com/GapHunterLabs/asyncapi-companion/compare/0.1.0...0.1.1

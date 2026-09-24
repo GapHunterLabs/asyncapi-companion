@@ -5,6 +5,7 @@ import com.intellij.json.psi.JsonStringLiteral
 import com.intellij.openapi.vfs.VfsUtilCore
 import com.intellij.psi.ElementManipulators
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiManager
 import com.intellij.psi.PsiReferenceBase
 import dev.gaphunter.asyncapicompanion.pointer.JsonPointer
@@ -33,28 +34,32 @@ class JsonAsyncApiRefReference(element: JsonStringLiteral) :
         val filePart = if (hashIndex >= 0) refText.substring(0, hashIndex) else refText
         val pointerPart = if (hashIndex >= 0) refText.substring(hashIndex + 1) else ""
 
-        val targetFile: JsonFile = if (filePart.isBlank()) {
-            element.containingFile as? JsonFile ?: return null
-        } else {
-            resolveLocalFile(filePart) ?: return null
-        }
-
         val decodedPointer = try {
             URLDecoder.decode(pointerPart, "UTF-8")
         } catch (e: Exception) {
             pointerPart
         }
-        if (decodedPointer.isEmpty()) return targetFile.topLevelValue ?: targetFile
 
-        val root = targetFile.topLevelValue ?: return null
-        return JsonPointer.resolve(root, decodedPointer)
+        if (filePart.isBlank()) {
+            val targetFile = element.containingFile as? JsonFile ?: return null
+            if (decodedPointer.isEmpty()) return targetFile.topLevelValue ?: targetFile
+            val root = targetFile.topLevelValue ?: return null
+            return JsonPointer.resolve(root, decodedPointer)
+        }
+
+        // The target of a $ref is resolved by its OWN real format, not
+        // assumed to match the format of the file containing the $ref --
+        // an AsyncAPI document written in JSON commonly references a
+        // YAML-formatted shared component file, and vice versa.
+        val targetFile = resolveLocalFile(filePart) ?: return null
+        return CrossFormatRefTarget.resolve(targetFile, decodedPointer)
     }
 
-    private fun resolveLocalFile(relativePath: String): JsonFile? {
+    private fun resolveLocalFile(relativePath: String): PsiFile? {
         val currentVirtualFile = element.containingFile?.originalFile?.virtualFile ?: return null
         val baseDir = currentVirtualFile.parent ?: return null
         val targetVirtualFile = VfsUtilCore.findRelativeFile(relativePath, baseDir) ?: return null
-        return PsiManager.getInstance(element.project).findFile(targetVirtualFile) as? JsonFile
+        return PsiManager.getInstance(element.project).findFile(targetVirtualFile)
     }
 
     override fun getVariants(): Array<Any> = emptyArray()

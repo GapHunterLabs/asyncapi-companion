@@ -22,6 +22,14 @@ plugins in this catalog. Paying and free users alike report:
   blank white screen with this: Error: The asyncapi field is missing.
   I have a valid asyncapi.yaml file."* — a real bug, not user error.
 
+Re-verified 2026-09-23: still 55% (11/20), same reviews, unchanged.
+Worth noting honestly: that competitor shipped a full rewrite of its
+own `$ref` resolution engine in 2026-08 (after the most recent review
+above), including free cross-format resolution — which is why this
+plugin added the same capability in 0.3.0. All three cited reviews
+predate that rewrite, and this plugin makes no claim about whether it
+fixed them.
+
 ## Why built this way
 
 - **Local-only reference resolution, no HTTP client anywhere in this
@@ -47,11 +55,14 @@ plugins in this catalog. Paying and free users alike report:
   problem: the platform's generic JSON Schema handler intercepts
   Ctrl+B before this plugin's own, more accurate resolution gets a
   chance to run).
-- **v1 scope cuts, deliberate:** same-format `$ref` resolution only
-  (no JSON file referencing into a YAML file or vice versa); no
-  AsyncAPI-version-aware validation of the document itself beyond
-  detecting it. Pure reference resolution, done reliably, is the whole
-  product.
+- **Cross-format `$ref` resolution** (0.3.0+): a JSON-formatted
+  document can reference a YAML-formatted shared component file and
+  vice versa -- the target file's own real format decides which PSI
+  backend resolves it, not the format of the file containing the
+  `$ref`.
+- **v1 scope cut, still deliberate:** no AsyncAPI-version-aware
+  validation of the document itself beyond detecting it. Pure
+  reference resolution, done reliably, is the whole product.
 - **One specific, real gotcha explained, not just flagged as broken:**
   AsyncAPI channel names are commonly topic-like paths
   (`user/signedup`, idiomatic for MQTT/Kafka-style channels). A `$ref`

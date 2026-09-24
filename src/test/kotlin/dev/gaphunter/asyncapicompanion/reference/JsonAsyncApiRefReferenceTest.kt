@@ -80,6 +80,44 @@ class JsonAsyncApiRefReferenceTest : BasePlatformTestCase() {
         assertEquals("user-signed-up.json", property.containingFile.name)
     }
 
+    /**
+     * A JSON-formatted AsyncAPI document referencing a YAML-formatted
+     * shared component file -- previously a documented v1 scope cut
+     * (the old code cast the resolved target file `as? JsonFile`, which
+     * always fails for a YAMLFile, so the ref silently never resolved).
+     * Added after re-auditing the leading competitor (id 15673): its
+     * 2026-08 rewrite shipped free cross-format resolution as a
+     * headline feature, closing the exact gap this plugin's own README
+     * used to call out as deliberately unsupported.
+     */
+    fun testResolvesRefIntoACrossFormatYamlFile() {
+        myFixture.addFileToProject(
+            "messages/user-signed-up.yaml",
+            """
+            UserSignedUp:
+              payload:
+                type: object
+            """.trimIndent(),
+        )
+        myFixture.configureByText(
+            "asyncapi.json",
+            """
+            {
+              "asyncapi": "2.6.0",
+              "components": {
+                "messages": {
+                  "SignupRef": { "${'$'}ref": "messages/user-signed-up.yaml#/UserSignedUp" }
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+        val refLiteral = findRefStringLiteral(myFixture.file)
+        val resolved = JsonAsyncApiRefReference(refLiteral).resolve()
+        assertNotNull("expected the JSON->YAML cross-format \$ref to resolve", resolved)
+        assertEquals("user-signed-up.yaml", resolved!!.containingFile.name)
+    }
+
     fun testDoesNotResolveWhenTargetIsMissing() {
         myFixture.configureByText(
             "asyncapi.json",
