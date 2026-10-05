@@ -80,10 +80,12 @@ or `asyncapi: "3.x"` at the top level. Ctrl+Click / Ctrl+B on any
 in your project. A `$ref` that can't be resolved is flagged with a
 warning instead of failing silently.
 
-## Enterprise / Team Licensing
+## Support
 
-Need enterprise features, custom validation rules, or team licensing?
-Contact us at **gaphunterlabs@gmail.com**.
+- **Bugs and feature requests:** [GitHub Issues](https://github.com/GapHunterLabs/asyncapi-companion/issues)
+- **Questions, or custom rules for a team's codebase:** **gaphunterlabs@gmail.com**
+- **Security vulnerabilities:** report privately as described in [SECURITY.md](SECURITY.md), not in a public issue.
+- **Privacy and network behavior:** [PRIVACY.md](PRIVACY.md)
 
 ## Development
 
