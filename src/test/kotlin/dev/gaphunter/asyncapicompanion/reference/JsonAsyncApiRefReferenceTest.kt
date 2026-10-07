@@ -180,8 +180,7 @@ class JsonAsyncApiRefReferenceTest : BasePlatformTestCase() {
      * `resolve()` on our own reference class directly and so can never
      * catch a suppressor/registration problem. Added 2026-08-12 after a
      * real runIde sandbox showed "No usages found" on this exact caret
-     * position -- see [[openapi_companion_ctrlclick_broken_with_trial]]
-     * memory entry for the full investigation.
+     * position.
      */
     fun testGotoDeclarationNavigatesThroughTheRealPlatformPipeline() {
         myFixture.configureByText(

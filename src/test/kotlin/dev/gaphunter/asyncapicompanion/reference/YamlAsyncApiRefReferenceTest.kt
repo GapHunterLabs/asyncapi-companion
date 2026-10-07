@@ -222,8 +222,7 @@ class YamlAsyncApiRefReferenceTest : BasePlatformTestCase() {
      * [JsonAsyncApiRefReferenceTest.testGotoDeclarationNavigatesThroughTheRealPlatformPipeline],
      * but reproducing the exact format (YAML, not JSON) used in the
      * live `runIde` sandbox session where Ctrl+Click showed "No usages
-     * found" -- see [[openapi_companion_ctrlclick_broken_with_trial]]
-     * memory entry. [testContributedReferenceIsAttachedThroughTheRealExtensionPipeline]
+     * found". [testContributedReferenceIsAttachedThroughTheRealExtensionPipeline]
      * above only proves the generic PsiReference is attached; it does
      * NOT prove GotoDeclarationAction picks it, because
      * GotoDeclarationHandlers (the suppressor's territory) are
@@ -260,8 +259,7 @@ class YamlAsyncApiRefReferenceTest : BasePlatformTestCase() {
 
     /**
      * Direct unit test of [AsyncApiGotoDeclarationHandler] -- added
-     * 2026-08-13 as the actual fix for the confirmed platform bug (see
-     * `openapi_companion_ctrlclick_broken_with_trial` memory entry):
+     * 2026-08-13 as the actual fix for the confirmed platform bug:
      * logging in a real `runIde` sandbox proved the suppressor +
      * generic-PsiReference-fallback hand-off silently breaks after
      * Ctrl+B, even though both halves work correctly in isolation. A

@@ -12,10 +12,8 @@ import org.jetbrains.yaml.psi.YAMLScalar
 /**
  * Registered `GotoDeclarationHandler` for `$ref` values in AsyncAPI
  * documents (JSON and YAML) -- the direct fix for a real, confirmed
- * platform bug (2026-08-13, see the
- * `openapi_companion_ctrlclick_broken_with_trial` memory entry for the
- * full logged investigation, confirmed live in a `runIde` sandbox by
- * the user after this fix): [AsyncApiJsonSchemaGtdSuppressor]
+ * platform bug (2026-08-13; found with logging in a `runIde` sandbox and
+ * confirmed fixed there): [AsyncApiJsonSchemaGtdSuppressor]
  * correctly suppresses the bundled `JsonSchemaGotoDeclarationHandler`
  * on every real Ctrl+B attempt, and [YamlAsyncApiRefReference]/
  * [JsonAsyncApiRefReference] correctly resolve `$ref` values -- but in

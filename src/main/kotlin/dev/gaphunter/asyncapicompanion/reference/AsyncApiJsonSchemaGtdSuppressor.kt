@@ -14,9 +14,7 @@ import dev.gaphunter.asyncapicompanion.detection.AsyncApiDetector
  * previews) that might consult this same extension point directly.
  * Unconditional here -- no license gate, this plugin is free.
  *
- * Investigation note (2026-08-13, see
- * `openapi_companion_ctrlclick_broken_with_trial` memory entry for the
- * full logged findings): live `runIde` logging proved this class works
+ * Investigation note (2026-08-13): live `runIde` logging proved this class works
  * correctly on its own -- `shouldSuppressGtd` is called on every real
  * Ctrl+B attempt and always returns `true` for a recognized AsyncAPI
  * file. The actual bug was a broken suppress-then-fallback hand-off
